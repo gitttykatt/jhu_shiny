@@ -1,0 +1,197 @@
+---
+title: "Shiny App Assignment"
+date: "July 20, 2021"
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Shiny App Assignment for JHU
+
+This is a submission for the **JHU Coursera - Developing Data Products** course. I have used the Iris data and visualized it with 2 input options --1) Sepal or Petal, and 2) Species. Per the official tutorial, I found that the latest version supports single-file app. Although the lessons were taught using 2 separate files, I tried developing the app with single file. The code does not fit in the slide. Please refer to the app file itself uploaded to the same repository for the details. 
+
+The app is hostes on Shiny.io: 
+[https://gitttykatt.shinyapps.io/jhu_shiny/](https://gitttykatt.shinyapps.io/jhu_shiny/)
+
+The tutorial from R Studio can be found on their website: 
+[https://shiny.rstudio.com/tutorial/written-tutorial/lesson1/](https://shiny.rstudio.com/tutorial/written-tutorial/lesson1/)
+
+## app.R code - ui part
+
+```{r, message=FALSE, eval=FALSE, echo=TRUE}
+
+# Define UI for app that draws a visualization of Iris dataset ----
+ui <- fluidPage(
+  
+  # App title ----
+  titlePanel("Iris dataset visualization"),
+
+  p("For JHU Coursera Assignment, July 20, 2021"),
+  br(), 
+  
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+    
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+      
+      # Input: Choices ----
+      
+      radioButtons(inputId = "sepalorpetal", 
+                   label = "Select Sepal or Petal:", 
+                   choices = list("Sepal" = "sepal", 
+                                  "Petal" = "petal"), 
+                   selected = "sepal"
+                   ), 
+      
+      checkboxGroupInput(inputId = "species",
+                  label = "Select Species:",
+                  choices = c("Setosa" = "setosa", 
+                              "Versicolor" = "versicolor", 
+                              "Virginica" = "virginica"), 
+                  selected = "setosa"
+                  ), 
+      
+      br(), 
+      p("More information on Iris dataset can be found on:"), 
+      a("https://en.wikipedia.org/wiki/Iris_flower_data_set")
+      
+    ),
+    
+    # Main panel for displaying outputs ----
+    mainPanel(
+      
+      # Output ----
+      plotOutput(outputId = "plot")
+      
+    )
+  )
+)
+
+```
+
+## app.R code - server part
+
+```{r, message=FALSE, eval=FALSE, echo=TRUE}
+
+# Define server logic required to draw a plot ----
+server <- function(input, output) {
+
+  output$plot <- renderPlot({
+    
+    data <- iris
+     
+    if (input$sepalorpetal == "sepal") {
+      data <- data %>% select(x = Sepal.Width, y = Sepal.Length, Species)
+    }
+    else if (input$sepalorpetal == "petal") {
+      data <- data %>% select(x = Petal.Width, y = Petal.Length, Species)
+    }
+    
+    validate(
+      need(input$species != "", "Please select at least 1 Specie")
+    )
+    
+    data %>%
+      filter(Species == input$species) %>%
+      ggplot(aes(x, y, col=Species)) + 
+      geom_point() + 
+      labs(x = "Width", y = "Length")
+  }
+
+  )
+}
+
+```
+
+## app.R Output
+
+```{r, message=FALSE}
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+# Define UI for app that draws a visualization of Iris dataset ----
+ui <- fluidPage(
+  
+  # App title ----
+  titlePanel("Iris dataset visualization"),
+
+  p("For JHU Coursera Assignment, July 20, 2021"),
+  br(), 
+  
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+    
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+      
+      # Input: Choices ----
+      
+      radioButtons(inputId = "sepalorpetal", 
+                   label = "Select Sepal or Petal:", 
+                   choices = list("Sepal" = "sepal", 
+                                  "Petal" = "petal"), 
+                   selected = "sepal"
+                   ), 
+      
+      checkboxGroupInput(inputId = "species",
+                  label = "Select Species:",
+                  choices = c("Setosa" = "setosa", 
+                              "Versicolor" = "versicolor", 
+                              "Virginica" = "virginica"), 
+                  selected = "setosa"
+                  ), 
+      
+      br(), 
+      p("More information on Iris dataset can be found on:"), 
+      a("https://en.wikipedia.org/wiki/Iris_flower_data_set")
+      
+    ),
+    
+    # Main panel for displaying outputs ----
+    mainPanel(
+      
+      # Output ----
+      plotOutput(outputId = "plot")
+      
+    )
+  )
+)
+
+# Define server logic required to draw a plot ----
+server <- function(input, output) {
+
+  output$plot <- renderPlot({
+    
+    data <- iris
+     
+    if (input$sepalorpetal == "sepal") {
+      data <- data %>% select(x = Sepal.Width, y = Sepal.Length, Species)
+    }
+    else if (input$sepalorpetal == "petal") {
+      data <- data %>% select(x = Petal.Width, y = Petal.Length, Species)
+    }
+    
+    validate(
+      need(input$species != "", "Please select at least 1 Specie")
+    )
+    
+    data %>%
+      filter(Species == input$species) %>%
+      ggplot(aes(x, y, col=Species)) + 
+      geom_point() + 
+      labs(x = "Width", y = "Length")
+  }
+
+  )
+}
+
+shinyApp(ui = ui, server = server)
+
+```
+
